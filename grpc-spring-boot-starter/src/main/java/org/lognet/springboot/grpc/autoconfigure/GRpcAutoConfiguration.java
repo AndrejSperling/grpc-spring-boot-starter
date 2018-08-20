@@ -23,6 +23,7 @@ import org.springframework.util.SocketUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by alexf on 25-Jan-16.
@@ -32,6 +33,8 @@ import java.util.Map;
 @ConditionalOnBean(annotation = GRpcService.class)
 @EnableConfigurationProperties(GRpcServerProperties.class)
 public class GRpcAutoConfiguration {
+
+    public static String RANDOM_NAME = "RANDOM_NAME";
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -50,7 +53,11 @@ public class GRpcAutoConfiguration {
     @Bean
     @ConditionalOnExpression("#{environment.getProperty('grpc.inProcessServerName','')!=''}")
     public GRpcServerRunner grpcInprocessServerRunner(GRpcServerBuilderConfigurer configurer){
-        return new GRpcServerRunner(configurer, InProcessServerBuilder.forName(grpcServerProperties.getInProcessServerName()));
+        String serverName = grpcServerProperties.getInProcessServerName();
+        if(RANDOM_NAME.equals(serverName)){
+            serverName = UUID.randomUUID().toString();
+        }
+        return new GRpcServerRunner(configurer, InProcessServerBuilder.forName(serverName));
     }
 
 
